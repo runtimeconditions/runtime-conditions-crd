@@ -28,3 +28,8 @@ go.work
 
 # Kubeconfig might contain secrets
 *.kubeconfig
+
+# Copied/derived into the Helm chart by `make helm-chart` - config/crd/bases
+# and config/rbac are the source of truth, not these.
+/charts/runtime-conditions-crd/crds/*.yaml
+/charts/runtime-conditions-crd/templates/rbac.yaml

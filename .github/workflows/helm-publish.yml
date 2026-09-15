@@ -1,0 +1,45 @@
+name: Publish Helm chart
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "charts/**"
+      - "config/crd/bases/**"
+      - "config/rbac/**"
+      - "Makefile"
+      - ".github/workflows/helm-publish.yml"
+  workflow_dispatch: {}
+
+permissions: {}
+
+jobs:
+  publish:
+    permissions:
+      contents: read
+      packages: write
+    name: Package and push to GHCR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone the code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Setup Helm
+        uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4.3.0
+
+      - name: Prepare chart (copy CRD, derive RBAC template)
+        run: make helm-chart
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Package chart
+        run: helm package charts/runtime-conditions-crd -d dist
+
+      - name: Push chart as an OCI artifact
+        run: |
+          chart_file="$(ls dist/runtime-conditions-crd-*.tgz)"
+          helm push "$chart_file" oci://ghcr.io/runtimeconditions/charts

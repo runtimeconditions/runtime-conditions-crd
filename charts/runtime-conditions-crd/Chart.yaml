@@ -1,0 +1,9 @@
+apiVersion: v2
+name: runtime-conditions-crd
+description: The RuntimeConditionsProfile CustomResourceDefinition (runtimeconditions.io/v1alpha1)
+type: application
+version: 0.1.0
+appVersion: v1alpha1
+home: https://runtimeconditions.io
+sources:
+  - https://github.com/runtimeconditions/runtime-conditions-crd

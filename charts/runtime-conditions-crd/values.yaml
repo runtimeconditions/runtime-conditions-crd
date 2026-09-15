@@ -1,0 +1,4 @@
+rbac:
+  # Install the convenience admin/editor/viewer ClusterRoles for the
+  # RuntimeConditionsProfile CRD. Not tied to any controller.
+  create: true
