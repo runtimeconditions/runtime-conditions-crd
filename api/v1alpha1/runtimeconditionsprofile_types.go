@@ -69,6 +69,13 @@ type Condition struct {
 	// +kubebuilder:validation:MinLength=1
 	Kind string `json:"kind"`
 
+	// extension picks which extension's kind to use, when more than one
+	// resolved extension defines the same kind. Checked by a webhook,
+	// not here.
+	// +optional
+	// +kubebuilder:validation:MinLength=1
+	Extension string `json:"extension,omitempty"`
+
 	// +required
 	// +kubebuilder:pruning:PreserveUnknownFields
 	Interface ConditionInterface `json:"interface"`
