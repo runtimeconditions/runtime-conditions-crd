@@ -67,6 +67,10 @@ vet: ## Run go vet against code.
 test: manifests generate fmt vet ## Run tests.
 	go test ./...
 
+.PHONY: test-admission
+test-admission: ## Validate CRD admission and profile fixtures against the selected Kubernetes context (1.33+).
+	python3 tests/test_crd_admission.py
+
 .PHONY: lint
 lint: golangci-lint ## Run golangci-lint linter
 	"$(GOLANGCI_LINT)" run

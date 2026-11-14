@@ -56,6 +56,7 @@ type Condition struct {
 	// name is a unique label for this condition within the profile.
 	// +optional
 	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:MaxLength=128
 	Name string `json:"name,omitempty"`
 
 	// +optional
@@ -102,15 +103,20 @@ type RuntimeConditionsProfile struct {
 	// extensions is the list of extension identifiers (absolute URIs) this
 	// profile depends on. Can be empty, can't have duplicates.
 	// +required
+	// +kubebuilder:validation:MaxItems=64
 	// +kubebuilder:validation:items:Format=uri
+	// +kubebuilder:validation:items:MaxLength=2048
 	// +kubebuilder:validation:XValidation:rule="self.all(e, e.matches('^[A-Za-z][A-Za-z0-9+.-]*:'))",message="each extension must have a URI scheme"
 	// +kubebuilder:validation:XValidation:rule="self.all(x, self.exists_one(y, y == x))",message="extensions must not contain duplicate identifiers"
 	Extensions []string `json:"extensions"`
 
 	// conditions is the workload's external runtime dependencies. Can be
 	// empty.
+	// A single-pass map rejects duplicate names without nested scans at the
+	// size limit. Two-variable CEL comprehensions require Kubernetes 1.33+.
 	// +required
-	// +kubebuilder:validation:XValidation:rule="self.filter(c, has(c.name)).all(c, self.filter(d, has(d.name) && d.name == c.name).size() == 1)",message="condition names must be unique within the profile"
+	// +kubebuilder:validation:MaxItems=256
+	// +kubebuilder:validation:XValidation:rule="self.transformMapEntry(i, c, has(c.name), {c.name: i}).size() == self.filter(c, has(c.name)).size()",message="condition names must be unique within the profile"
 	Conditions []Condition `json:"conditions"`
 }
 

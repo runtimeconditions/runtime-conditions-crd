@@ -39,6 +39,8 @@ spec:
             description: |-
               conditions is the workload's external runtime dependencies. Can be
               empty.
+              A single-pass map rejects duplicate names without nested scans at the
+              size limit. Two-variable CEL comprehensions require Kubernetes 1.33+.
             items:
               description: |-
                 Condition is one external runtime dependency a workload requires.
@@ -80,6 +82,7 @@ spec:
                 name:
                   description: name is a unique label for this condition within the
                     profile.
+                  maxLength: 128
                   minLength: 1
                   type: string
                 optional:
@@ -90,18 +93,21 @@ spec:
               - kind
               type: object
               x-kubernetes-preserve-unknown-fields: true
+            maxItems: 256
             type: array
             x-kubernetes-validations:
             - message: condition names must be unique within the profile
-              rule: self.filter(c, has(c.name)).all(c, self.filter(d, has(d.name)
-                && d.name == c.name).size() == 1)
+              rule: 'self.transformMapEntry(i, c, has(c.name), {c.name: i}).size()
+                == self.filter(c, has(c.name)).size()'
           extensions:
             description: |-
               extensions is the list of extension identifiers (absolute URIs) this
               profile depends on. Can be empty, can't have duplicates.
             items:
               format: uri
+              maxLength: 2048
               type: string
+            maxItems: 64
             type: array
             x-kubernetes-validations:
             - message: each extension must have a URI scheme
